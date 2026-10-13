@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EO Tools Management - System Dashboard</title>
+    <!-- Bootstrap 5 CSS & FontAwesome Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar-brand { font-weight: 700; letter-spacing: 0.5px; }
+        .nav-pills .nav-link { font-weight: 600; border-radius: 8px; color: #495057; margin-right: 8px; padding: 10px 20px; cursor: pointer; transition: all 0.2s; }
+        .nav-pills .nav-link.active { background-color: #0d6efd; color: #fff; }
+        .card { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: transform 0.2s; }
+        .card:hover { transform: translateY(-2px); }
+        .stock-badge { font-size: 0.85rem; font-weight: 700; border-radius: 20px; padding: 4px 12px; }
+        .badge-status-UPCOMING { background-color: #0dcaf0; color: #000; }
+        .badge-status-ONGOING { background-color: #ffc107; color: #000; }
+        .badge-status-COMPLETED { background-color: #198754; color: #fff; }
+        .badge-status-CANCELLED { background-color: #dc3545; color: #fff; }
+        .header-banner { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+        .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 1090; }
+        .modal { background-color: rgba(0,0,0,0.5); }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="fa-solid fa-sliders me-2 text-warning"></i>EO Tools Management</a>
+            <span class="navbar-text text-light small"><i class="fa-solid fa-circle-check text-success me-1"></i>Server Online</span>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+        <!-- Banner Title -->
+        <div class="header-banner shadow-sm d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <h2 class="fw-bold mb-1"><i class="fa-solid fa-calendar-check me-2"></i>Scheduling & Equipment System</h2>
+                <p class="mb-0 opacity-75">Sistem Manajemen Jadwal Event, Inventaris Alat EO & Alokasi Kru</p>
+            </div>
+            <button type="button" class="btn btn-light fw-bold px-3 shadow-sm" onclick="loadAllData()"><i class="fa-solid fa-rotate me-1"></i> Refresh Data</button>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-pills mb-4" id="mainTab">
+            <li class="nav-item">
+                <button type="button" class="nav-link active" id="btn-tab-schedules" onclick="switchTab('schedules-pane', this)"><i class="fa-solid fa-calendar-days me-2"></i>1. Jadwal Event</button>
+            </li>
+            <li class="nav-item">
+                <button type="button" class="nav-link" id="btn-tab-equipment" onclick="switchTab('equipment-pane', this)"><i class="fa-solid fa-boxes-packing me-2"></i>2. Inventaris Alat & Stok</button>
+            </li>
+            <li class="nav-item">
+                <button type="button" class="nav-link" id="btn-tab-crews" onclick="switchTab('crews-pane', this)"><i class="fa-solid fa-users me-2"></i>3. Data Kru</button>
+            </li>
+        </ul>
+
+        <!-- Tab Contents -->
+        <div class="tab-content" id="mainTabContent">
+
+            <!-- TAB 1: SCHEDULES -->
+            <div class="tab-pane fade show active" id="schedules-pane" style="display: block;">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <h4 class="fw-bold text-secondary mb-0"><i class="fa-solid fa-list-check me-2"></i>Daftar Jadwal Event</h4>
+                    <button type="button" class="btn btn-primary fw-bold" onclick="openAddScheduleModal()"><i class="fa-solid fa-plus me-1"></i> Tambah Jadwal Event</button>
+                </div>
+                <div id="scheduleList" class="row g-3">
+                    <!-- Schedule cards rendered here -->
+                </div>
+            </div>
+
+            <!-- TAB 2: EQUIPMENT -->
+            <div class="tab-pane fade" id="equipment-pane" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <h4 class="fw-bold text-secondary mb-0"><i class="fa-solid fa-microphone-lines me-2"></i>Inventaris Alat EO</h4>
+                        <select class="form-select form-select-sm" id="categoryFilter" style="width: 160px;" onchange="filterEquipments()">
+                            <option value="">Semua Kategori</option>
+                            <option value="Audio">Audio</option>
+                            <option value="Lighting">Lighting</option>
+                            <option value="Stage">Stage</option>
+                            <option value="Camera">Camera & Video</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-success fw-bold" onclick="openAddEquipmentModal()"><i class="fa-solid fa-plus me-1"></i> Tambah Alat Baru</button>
+                </div>
+                <div id="equipmentList" class="row g-3">
+                    <!-- Equipment cards rendered here -->
+                </div>
+            </div>
+
+            <!-- TAB 3: CREWS -->
+            <div class="tab-pane fade" id="crews-pane" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <h4 class="fw-bold text-secondary mb-0"><i class="fa-solid fa-user-gear me-2"></i>Daftar Kru Event</h4>
+                    <button type="button" class="btn btn-info text-white fw-bold" onclick="openAddCrewModal()"><i class="fa-solid fa-user-plus me-1"></i> Tambah Kru Baru</button>
+                </div>
+                <div id="crewList" class="row g-3">
+                    <!-- Crew cards rendered here -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODAL: ADD / EDIT SCHEDULE -->
+    <div class="modal" id="scheduleModal" tabindex="-1" style="display: none;">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold" id="scheduleModalTitle"><i class="fa-solid fa-calendar-plus me-2"></i>Form Jadwal Event</h5>
+                    <button type="button" class="btn-close btn-close-white" onclick="hideModal('scheduleModal')"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="scheduleForm" onsubmit="event.preventDefault(); saveSchedule();">
+                        <input type="hidden" id="scheduleId">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="eventName">Nama Event *</label>
+                            <input type="text" class="form-control" id="eventName" placeholder="Contoh: Wedding Concert Event" required>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="scheduleLocation">Lokasi Event *</label>
+                                <input type="text" class="form-control" id="scheduleLocation" placeholder="Lokasi Gedung / Lapangan" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="scheduleStatus">Status Event</label>
+                                <select class="form-select" id="scheduleStatus">
+                                    <option value="UPCOMING">UPCOMING</option>
+                                    <option value="ONGOING">ONGOING</option>
+                                    <option value="COMPLETED">COMPLETED</option>
+                                    <option value="CANCELLED">CANCELLED</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="startDate">Tanggal Mulai *</label>
+                                <input type="date" class="form-control" id="startDate" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="endDate">Tanggal Selesai *</label>
+                                <input type="date" class="form-control" id="endDate" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="scheduleDesc">Deskripsi Event</label>
+                            <textarea class="form-control" id="scheduleDesc" rows="2" placeholder="Catatan detail event..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold"><i class="fa-solid fa-boxes-stacked me-1"></i>Pilih Alat yang Dipinjam</label>
+                            <div id="equipmentCheckboxes" class="border rounded p-3 bg-light">
+                                <!-- Dynamic Checkboxes -->
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold"><i class="fa-solid fa-users-gear me-1"></i>Pilih Kru Bertugas</label>
+                            <div id="crewCheckboxes" class="border rounded p-3 bg-light">
+                                <!-- Dynamic Checkboxes -->
+                            </div>
+                        </div>
+                        <div class="modal-footer px-0 pb-0 pt-3">
+                            <button type="button" class="btn btn-secondary" onclick="hideModal('scheduleModal')">Batal</button>
+                            <button type="submit" class="btn btn-primary fw-bold"><i class="fa-solid fa-floppy-disk me-1"></i> Simpan Jadwal</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD / EDIT EQUIPMENT -->
+    <div class="modal" id="equipmentModal" tabindex="-1" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title fw-bold" id="equipmentModalTitle"><i class="fa-solid fa-box-open me-2"></i>Form Alat EO</h5>
+                    <button type="button" class="btn-close btn-close-white" onclick="hideModal('equipmentModal')"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="equipmentForm" onsubmit="event.preventDefault(); saveEquipment();">
+                        <input type="hidden" id="equipmentId">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="eqName">Nama Alat *</label>
+                            <input type="text" class="form-control" id="eqName" placeholder="Contoh: Wireless Mic Sennheiser" required>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="eqCategory">Kategori *</label>
+                                <select class="form-select" id="eqCategory" required>
+                                    <option value="Audio">Audio</option>
+                                    <option value="Lighting">Lighting</option>
+                                    <option value="Stage">Stage</option>
+                                    <option value="Camera">Camera & Video</option>
+                                    <option value="Lain-Lain">Lain-Lain</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="eqTotalQty">Total Stok *</label>
+                                <input type="number" class="form-control" id="eqTotalQty" min="1" value="10" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="eqCondition">Kondisi Alat</label>
+                            <input type="text" class="form-control" id="eqCondition" value="Bagus" placeholder="Bagus / Perlu Perbaikan">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="eqDesc">Deskripsi</label>
+                            <textarea class="form-control" id="eqDesc" rows="2" placeholder="Detail spesifikasi..."></textarea>
+                        </div>
+                        <div class="modal-footer px-0 pb-0 pt-3">
+                            <button type="button" class="btn btn-secondary" onclick="hideModal('equipmentModal')">Batal</button>
+                            <button type="submit" class="btn btn-success fw-bold"><i class="fa-solid fa-floppy-disk me-1"></i> Simpan Alat</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD / EDIT CREW -->
+    <div class="modal" id="crewModal" tabindex="-1" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title fw-bold" id="crewModalTitle"><i class="fa-solid fa-user-plus me-2"></i>Form Data Kru</h5>
+                    <button type="button" class="btn-close btn-close-white" onclick="hideModal('crewModal')"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="crewForm" onsubmit="event.preventDefault(); saveCrew();">
+                        <input type="hidden" id="crewId">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="crewName">Nama Lengkap Kru *</label>
+                            <input type="text" class="form-control" id="crewName" placeholder="Contoh: Budi Santoso" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="crewPhone">Nomor Telepon / WhatsApp *</label>
+                            <input type="text" class="form-control" id="crewPhone" placeholder="081234567890" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="crewRole">Role / Jabatan *</label>
+                            <select class="form-select" id="crewRole" required>
+                                <option value="Audio Engineer">Audio Engineer</option>
+                                <option value="Lighting Tech">Lighting Tech</option>
+                                <option value="Stage Manager">Stage Manager</option>
+                                <option value="Camera Operator">Camera Operator</option>
+                                <option value="General Crew">General Crew</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold"><i class="fa-solid fa-wrench me-1"></i>Tugaskan Alat Spesifik (Opsional)</label>
+                            <div id="crewEquipmentCheckboxes" class="border rounded p-3 bg-light">
+                                <!-- Dynamic checkboxes -->
+                            </div>
+                        </div>
+                        <div class="modal-footer px-0 pb-0 pt-3">
+                            <button type="button" class="btn btn-secondary" onclick="hideModal('crewModal')">Batal</button>
+                            <button type="submit" class="btn btn-info text-white fw-bold"><i class="fa-solid fa-floppy-disk me-1"></i> Simpan Kru</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Feedback Container -->
+    <div class="toast-container">
+        <div id="appToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body fw-bold" id="toastMessage">Notifikasi</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="hideToast()"></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        let globalSchedules = [];
+        let globalEquipments = [];
+        let globalCrews = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAllData();
+        });
+
+        // TAB SWITCHING (VANILLA JS - NO BOOTSTRAP DEPENDENCY NEEDED)
+        function switchTab(paneId, btnEl) {
+            document.querySelectorAll('.tab-pane').forEach(el => {
+                el.style.display = 'none';
+                el.classList.remove('show', 'active');
+            });
+            document.querySelectorAll('#mainTab .nav-link').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            const targetPane = document.getElementById(paneId);
+            if (targetPane) {
+                targetPane.style.display = 'block';
+                targetPane.classList.add('show', 'active');
+            }
+            if (btnEl) {
+                btnEl.classList.add('active');
+            }
+        }
+
+        // MODAL HELPERS (VANILLA JS)
+        function showModal(modalId) {
+            const modalEl = document.getElementById(modalId);
+            if (!modalEl) return;
+            modalEl.style.display = 'block';
+            modalEl.classList.add('show');
+
+            let backdrop = document.getElementById('customBackdrop');
+            if (!backdrop) {
+                backdrop = document.createElement('div');
+                backdrop.id = 'customBackdrop';
+                backdrop.className = 'modal-backdrop fade show';
+                document.body.appendChild(backdrop);
+            }
+        }
+
+        function hideModal(modalId) {
+            const modalEl = document.getElementById(modalId);
+            if (!modalEl) return;
+            modalEl.style.display = 'none';
+            modalEl.classList.remove('show');
+
+            const backdrop = document.getElementById('customBackdrop');
+            if (backdrop) {
+                backdrop.remove();
+            }
+        }
+
+        function showToast(msg, bgClass = 'bg-success') {
+            const toastEl = document.getElementById('appToast');
+            toastEl.className = `toast align-items-center text-white border-0 ${bgClass} show`;
+            document.getElementById('toastMessage').innerText = msg;
+            setTimeout(() => { hideToast(); }, 3000);
+        }
+
+        function hideToast() {
+            const toastEl = document.getElementById('appToast');
+            toastEl.classList.remove('show');
+        }
+
+        async function loadAllData() {
+            await Promise.all([fetchSchedules(), fetchEquipments(), fetchCrews()]);
+        }
+
+        // ================= SCHEDULES =================
+        async function fetchSchedules() {
+            try {
+                const res = await fetch(`${API_BASE}/schedules`);
+                globalSchedules = await res.json();
+                renderSchedules(globalSchedules);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function renderSchedules(schedules) {
+            const container = document.getElementById('scheduleList');
+            if (!schedules || schedules.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12 text-center py-5">
+                        <i class="fa-solid fa-calendar-xmark fa-3x text-muted mb-3"></i>
+                        <p class="text-muted fw-semibold">Belum ada jadwal event. Klik "+ Tambah Jadwal Event" untuk membuat baru.</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = schedules.map(s => {
+                const eqBadges = s.equipments.map(e => `<span class="badge bg-secondary me-1 mb-1"><i class="fa-solid fa-box me-1"></i>${e.equipmentName} (${e.quantityBorrowed})</span>`).join('') || '<span class="text-muted small">Tidak ada alat dipinjam</span>';
+                const crewBadges = s.crews.map(c => `<span class="badge bg-dark me-1 mb-1"><i class="fa-solid fa-user me-1"></i>${c.name} (${c.role})</span>`).join('') || '<span class="text-muted small">Belum ada kru</span>';
+
+                return `
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 p-3">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="fw-bold text-dark mb-0">${s.eventName}</h5>
+                            <span class="stock-badge badge-status-${s.status}">${s.status}</span>
+                        </div>
+                        <p class="text-muted small mb-1"><i class="fa-solid fa-location-dot me-1 text-danger"></i>${s.location}</p>
+                        <p class="text-secondary small mb-2"><i class="fa-regular fa-calendar me-1"></i>${s.startDate} s/d ${s.endDate}</p>
+                        <p class="small text-dark mb-3">${s.description || 'Tidak ada deskripsi'}</p>
+
+                        <div class="mb-2">
+                            <small class="fw-bold text-secondary d-block mb-1">Alat Dipinjam:</small>
+                            <div>${eqBadges}</div>
+                        </div>
+                        <div class="mb-3">
+                            <small class="fw-bold text-secondary d-block mb-1">Kru Bertugas:</small>
+                            <div>${crewBadges}</div>
+                        </div>
+
+                        <div class="mt-auto border-top pt-2 d-flex justify-content-between align-items-center">
+                            <select class="form-select form-select-sm" style="width:120px;" onchange="changeScheduleStatus(${s.id}, this.value)">
+                                <option value="UPCOMING" ${s.status==='UPCOMING'?'selected':''}>UPCOMING</option>
+                                <option value="ONGOING" ${s.status==='ONGOING'?'selected':''}>ONGOING</option>
+                                <option value="COMPLETED" ${s.status==='COMPLETED'?'selected':''}>COMPLETED</option>
+                                <option value="CANCELLED" ${s.status==='CANCELLED'?'selected':''}>CANCELLED</option>
+                            </select>
+                            <div>
+                                <button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="openEditScheduleModal(${s.id})"><i class="fa-solid fa-pen"></i> Edit</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteSchedule(${s.id})"><i class="fa-solid fa-trash"></i> Hapus</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        async function changeScheduleStatus(id, newStatus) {
+            try {
+                await fetch(`${API_BASE}/schedules/${id}/status?status=${newStatus}`, { method: 'PATCH' });
+                showToast(`Status event berhasil diubah ke ${newStatus}`);
+                loadAllData();
+            } catch (err) {
+                showToast('Gagal mengubah status', 'bg-danger');
+            }
+        }
+
+        function openAddScheduleModal() {
+            document.getElementById('scheduleModalTitle').innerHTML = '<i class="fa-solid fa-calendar-plus me-2"></i>Tambah Jadwal Event';
+            document.getElementById('scheduleForm').reset();
+            document.getElementById('scheduleId').value = '';
+            renderScheduleCheckboxes([], []);
+            showModal('scheduleModal');
+        }
+
+        function openEditScheduleModal(id) {
+            const s = globalSchedules.find(item => item.id === id);
+            if (!s) return;
+
+            document.getElementById('scheduleModalTitle').innerHTML = '<i class="fa-solid fa-pen-to-square me-2"></i>Edit Jadwal Event';
+            document.getElementById('scheduleId').value = s.id;
+            document.getElementById('eventName').value = s.eventName;
+            document.getElementById('scheduleLocation').value = s.location;
+            document.getElementById('scheduleStatus').value = s.status;
+            document.getElementById('startDate').value = s.startDate;
+            document.getElementById('endDate').value = s.endDate;
+            document.getElementById('scheduleDesc').value = s.description || '';
+
+            renderScheduleCheckboxes(s.equipments, s.crews);
+            showModal('scheduleModal');
+        }
+
+        function renderScheduleCheckboxes(selectedEquipments = [], selectedCrews = []) {
+            const eqContainer = document.getElementById('equipmentCheckboxes');
+            if (globalEquipments.length === 0) {
+                eqContainer.innerHTML = '<p class="text-muted small mb-0">Belum ada alat terdaftar. Tambahkan alat dulu di Tab 2.</p>';
+            } else {
+                eqContainer.innerHTML = globalEquipments.map(e => {
+                    const foundEq = selectedEquipments.find(item => item.equipmentId === e.id);
+                    const checked = foundEq ? 'checked' : '';
+                    const qty = foundEq ? foundEq.quantityBorrowed : 1;
+
+                    return `
+                    <div class="d-flex align-items-center mb-2">
+                        <input class="form-check-input me-2 eq-checkbox" type="checkbox" value="${e.id}" id="eq_check_${e.id}" ${checked}>
+                        <label class="form-check-label me-auto small fw-semibold" for="eq_check_${e.id}">${e.name} (Sisa: ${e.availableQuantity}/${e.totalQuantity})</label>
+                        <input type="number" class="form-control form-control-sm eq-qty" id="eq_qty_${e.id}" value="${qty}" min="1" max="${e.totalQuantity}" style="width:75px">
+                    </div>`;
+                }).join('');
+            }
+
+            const crewContainer = document.getElementById('crewCheckboxes');
+            if (globalCrews.length === 0) {
+                crewContainer.innerHTML = '<p class="text-muted small mb-0">Belum ada kru terdaftar. Tambahkan kru dulu di Tab 3.</p>';
+            } else {
+                crewContainer.innerHTML = globalCrews.map(c => {
+                    const isChecked = selectedCrews.some(item => item.id === c.id) ? 'checked' : '';
+                    return `
+                    <div class="form-check">
+                        <input class="form-check-input crew-checkbox" type="checkbox" value="${c.id}" id="crew_check_${c.id}" ${isChecked}>
+                        <label class="form-check-label small fw-semibold" for="crew_check_${c.id}">${c.name} - ${c.role}</label>
+                    </div>`;
+                }).join('');
+            }
+        }
+
+        async function saveSchedule() {
+            const id = document.getElementById('scheduleId').value;
+            const borrowings = [];
+            document.querySelectorAll('.eq-checkbox:checked').forEach(cb => {
+                const eqId = parseInt(cb.value);
+                const qtyInput = document.getElementById(`eq_qty_${eqId}`);
+                const qty = parseInt(qtyInput.value) || 1;
+                borrowings.push({ equipmentId: eqId, quantityBorrowed: qty });
+            });
+
+            const crewIds = Array.from(document.querySelectorAll('.crew-checkbox:checked')).map(cb => parseInt(cb.value));
+
+            const body = {
+                eventName: document.getElementById('eventName').value,
+                location: document.getElementById('scheduleLocation').value,
+                status: document.getElementById('scheduleStatus').value,
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value,
+                description: document.getElementById('scheduleDesc').value,
+                equipmentBorrowings: borrowings,
+                crewIds: crewIds
+            };
+
+            const url = id ? `${API_BASE}/schedules/${id}` : `${API_BASE}/schedules`;
+            const method = id ? 'PUT' : 'POST';
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                if (!res.ok) throw new Error('Simpan gagal');
+
+                showToast(id ? 'Jadwal berhasil diperbarui!' : 'Jadwal baru berhasil dibuat!');
+                hideModal('scheduleModal');
+                loadAllData();
+            } catch (err) {
+                showToast('Gagal menyimpan jadwal event', 'bg-danger');
+            }
+        }
+
+        async function deleteSchedule(id) {
+            if (confirm('Hapus jadwal event ini?')) {
+                try {
+                    await fetch(`${API_BASE}/schedules/${id}`, { method: 'DELETE' });
+                    showToast('Jadwal event berhasil dihapus!');
+                    loadAllData();
+                } catch (err) {
+                    showToast('Gagal menghapus jadwal', 'bg-danger');
+                }
+            }
+        }
+
+        // ================= EQUIPMENT =================
+        async function fetchEquipments() {
+            try {
+                const res = await fetch(`${API_BASE}/equipment`);
+                globalEquipments = await res.json();
+                renderEquipments(globalEquipments);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function filterEquipments() {
+            const cat = document.getElementById('categoryFilter').value;
+            if (!cat) {
+                renderEquipments(globalEquipments);
+            } else {
+                const filtered = globalEquipments.filter(e => e.category.toLowerCase().includes(cat.toLowerCase()));
+                renderEquipments(filtered);
+            }
+        }
+
+        function renderEquipments(equipments) {
+            const container = document.getElementById('equipmentList');
+            if (!equipments || equipments.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12 text-center py-5">
+                        <i class="fa-solid fa-boxes-stacked fa-3x text-muted mb-3"></i>
+                        <p class="text-muted fw-semibold">Belum ada alat terdaftar. Klik "+ Tambah Alat Baru" untuk menambah inventaris.</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = equipments.map(e => {
+                const isAvailable = e.availableQuantity > 0;
+
+                return `
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 p-3">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="fw-bold text-dark mb-0">${e.name}</h5>
+                            <span class="badge bg-primary">${e.category}</span>
+                        </div>
+                        <p class="text-muted small mb-2">${e.description || 'Tanpa deskripsi'}</p>
+
+                        <div class="p-2 bg-light rounded my-2 border">
+                            <div class="d-flex justify-content-between small fw-bold">
+                                <span>Total Stok: ${e.totalQuantity}</span>
+                                <span class="text-${isAvailable ? 'success' : 'danger'}">Tersedia: ${e.availableQuantity}</span>
+                            </div>
+                        </div>
+
+                        <p class="small text-secondary mb-3"><i class="fa-solid fa-wrench me-1"></i>Kondisi: <strong>${e.conditionStatus || 'Bagus'}</strong></p>
+
+                        <div class="mt-auto border-top pt-2 d-flex justify-content-end">
+                            <button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="openEditEquipmentModal(${e.id})"><i class="fa-solid fa-pen"></i> Edit</button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteEquipment(${e.id})"><i class="fa-solid fa-trash"></i> Hapus</button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function openAddEquipmentModal() {
+            document.getElementById('equipmentModalTitle').innerHTML = '<i class="fa-solid fa-box-open me-2"></i>Tambah Alat EO Baru';
+            document.getElementById('equipmentForm').reset();
+            document.getElementById('equipmentId').value = '';
+            showModal('equipmentModal');
+        }
+
+        function openEditEquipmentModal(id) {
+            const e = globalEquipments.find(item => item.id === id);
+            if (!e) return;
+
+            document.getElementById('equipmentModalTitle').innerHTML = '<i class="fa-solid fa-pen-to-square me-2"></i>Edit Data Alat';
+            document.getElementById('equipmentId').value = e.id;
+            document.getElementById('eqName').value = e.name;
+            document.getElementById('eqCategory').value = e.category;
+            document.getElementById('eqTotalQty').value = e.totalQuantity;
+            document.getElementById('eqCondition').value = e.conditionStatus || 'Bagus';
+            document.getElementById('eqDesc').value = e.description || '';
+
+            showModal('equipmentModal');
+        }
+
+        async function saveEquipment() {
+            const id = document.getElementById('equipmentId').value;
+            const body = {
+                name: document.getElementById('eqName').value,
+                category: document.getElementById('eqCategory').value,
+                totalQuantity: parseInt(document.getElementById('eqTotalQty').value),
+                conditionStatus: document.getElementById('eqCondition').value,
+                description: document.getElementById('eqDesc').value
+            };
+
+            const url = id ? `${API_BASE}/equipment/${id}` : `${API_BASE}/equipment`;
+            const method = id ? 'PUT' : 'POST';
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                if (!res.ok) throw new Error('Gagal simpan');
+
+                showToast(id ? 'Data alat berhasil diperbarui!' : 'Alat baru berhasil ditambahkan!');
+                hideModal('equipmentModal');
+                loadAllData();
+            } catch (err) {
+                showToast('Gagal menyimpan alat', 'bg-danger');
+            }
+        }
+
+        async function deleteEquipment(id) {
+            if (confirm('Hapus alat ini dari inventaris?')) {
+                try {
+                    await fetch(`${API_BASE}/equipment/${id}`, { method: 'DELETE' });
+                    showToast('Alat berhasil dihapus!');
+                    loadAllData();
+                } catch (err) {
+                    showToast('Gagal menghapus alat', 'bg-danger');
+                }
+            }
+        }
+
+        // ================= CREWS =================
+        async function fetchCrews() {
+            try {
+                const res = await fetch(`${API_BASE}/crews`);
+                globalCrews = await res.json();
+                renderCrews(globalCrews);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function renderCrews(crews) {
+            const container = document.getElementById('crewList');
+            if (!crews || crews.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12 text-center py-5">
+                        <i class="fa-solid fa-user-slash fa-3x text-muted mb-3"></i>
+                        <p class="text-muted fw-semibold">Belum ada data kru. Klik "+ Tambah Kru Baru" untuk menambahkan kru.</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = crews.map(c => {
+                const eqList = c.assignedEquipments.map(e => `<span class="badge bg-secondary me-1 mb-1"><i class="fa-solid fa-wrench me-1"></i>${e.name}</span>`).join('') || '<span class="text-muted small">Tidak memegang alat khusus</span>';
+
+                return `
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 p-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-user-circle me-1 text-info"></i>${c.name}</h5>
+                            <span class="badge bg-info text-white">${c.role}</span>
+                        </div>
+                        <p class="text-muted small mb-2"><i class="fa-solid fa-phone me-1 text-success"></i>${c.phone}</p>
+
+                        <div class="mt-2 mb-3">
+                            <small class="fw-bold text-secondary d-block mb-1">Alat Ditangani:</small>
+                            <div>${eqList}</div>
+                        </div>
+
+                        <div class="mt-auto border-top pt-2 d-flex justify-content-end">
+                            <button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="openEditCrewModal(${c.id})"><i class="fa-solid fa-pen"></i> Edit</button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteCrew(${c.id})"><i class="fa-solid fa-trash"></i> Hapus</button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function openAddCrewModal() {
+            document.getElementById('crewModalTitle').innerHTML = '<i class="fa-solid fa-user-plus me-2"></i>Tambah Kru Baru';
+            document.getElementById('crewForm').reset();
+            document.getElementById('crewId').value = '';
+            renderCrewEquipmentCheckboxes([]);
+            showModal('crewModal');
+        }
+
+        function openEditCrewModal(id) {
+            const c = globalCrews.find(item => item.id === id);
+            if (!c) return;
+
+            document.getElementById('crewModalTitle').innerHTML = '<i class="fa-solid fa-pen-to-square me-2"></i>Edit Data Kru';
+            document.getElementById('crewId').value = c.id;
+            document.getElementById('crewName').value = c.name;
+            document.getElementById('crewPhone').value = c.phone;
+            document.getElementById('crewRole').value = c.role;
+
+            renderCrewEquipmentCheckboxes(c.assignedEquipments);
+            showModal('crewModal');
+        }
+
+        function renderCrewEquipmentCheckboxes(assignedEquipments = []) {
+            const container = document.getElementById('crewEquipmentCheckboxes');
+            if (globalEquipments.length === 0) {
+                container.innerHTML = '<p class="text-muted small mb-0">Belum ada alat terdaftar.</p>';
+            } else {
+                container.innerHTML = globalEquipments.map(e => {
+                    const isChecked = assignedEquipments.some(item => item.id === e.id) ? 'checked' : '';
+                    return `
+                    <div class="form-check">
+                        <input class="form-check-input crew-eq-checkbox" type="checkbox" value="${e.id}" id="crew_eq_${e.id}" ${isChecked}>
+                        <label class="form-check-label small fw-semibold" for="crew_eq_${e.id}">${e.name} (${e.category})</label>
+                    </div>`;
+                }).join('');
+            }
+        }
+
+        async function saveCrew() {
+            const id = document.getElementById('crewId').value;
+            const eqIds = Array.from(document.querySelectorAll('.crew-eq-checkbox:checked')).map(cb => parseInt(cb.value));
+
+            const body = {
+                name: document.getElementById('crewName').value,
+                phone: document.getElementById('crewPhone').value,
+                role: document.getElementById('crewRole').value,
+                equipmentIds: eqIds
+            };
+
+            const url = id ? `${API_BASE}/crews/${id}` : `${API_BASE}/crews`;
+            const method = id ? 'PUT' : 'POST';
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                if (!res.ok) throw new Error('Simpan gagal');
+
+                showToast(id ? 'Data kru berhasil diperbarui!' : 'Kru baru berhasil ditambahkan!');
+                hideModal('crewModal');
+                loadAllData();
+            } catch (err) {
+                showToast('Gagal menyimpan data kru', 'bg-danger');
+            }
+        }
+
+        async function deleteCrew(id) {
+            if (confirm('Hapus data kru ini?')) {
+                try {
+                    await fetch(`${API_BASE}/crews/${id}`, { method: 'DELETE' });
+                    showToast('Data kru berhasil dihapus!');
+                    loadAllData();
+                } catch (err) {
+                    showToast('Gagal menghapus data kru', 'bg-danger');
+                }
+            }
+        }
+    </script>
+</body>
+</html>

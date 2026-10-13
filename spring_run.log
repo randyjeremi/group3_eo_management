@@ -1,0 +1,224 @@
+Starting a Gradle Daemon, 1 incompatible and 1 stopped Daemons could not be reused, use --status for details
+> Task :checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :compileKotlin UP-TO-DATE
+> Task :compileJava NO-SOURCE
+> Task :processResources UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :resolveMainClassName UP-TO-DATE
+
+> Task :bootRun
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.1)
+
+2026-10-05T18:33:33.874+07:00  INFO 30700 --- [EOToolsManagement] [           main] c.r.E.EoToolsManagementApplicationKt     : Starting EoToolsManagementApplicationKt using Java 25.0.3 with PID 30700 (C:\Users\LENOVO\OneDrive\Documents\COOLYEAH\Visual Programming\EOToolsManagement\build\classes\kotlin\main started by Randy Jeremy in C:\Users\LENOVO\OneDrive\Documents\COOLYEAH\Visual Programming\EOToolsManagement)
+2026-10-05T18:33:33.878+07:00  INFO 30700 --- [EOToolsManagement] [           main] c.r.E.EoToolsManagementApplicationKt     : No active profile set, falling back to 1 default profile: "default"
+2026-10-05T18:33:35.069+07:00  INFO 30700 --- [EOToolsManagement] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-10-05T18:33:35.145+07:00  INFO 30700 --- [EOToolsManagement] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 67 ms. Found 4 JPA repository interfaces.
+2026-10-05T18:33:35.701+07:00  INFO 30700 --- [EOToolsManagement] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8080 (http)
+2026-10-05T18:33:35.717+07:00  INFO 30700 --- [EOToolsManagement] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-10-05T18:33:35.717+07:00  INFO 30700 --- [EOToolsManagement] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.24]
+2026-10-05T18:33:35.776+07:00  INFO 30700 --- [EOToolsManagement] [           main] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 1835 ms
+2026-10-05T18:33:35.965+07:00  INFO 30700 --- [EOToolsManagement] [           main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-10-05T18:33:36.025+07:00  INFO 30700 --- [EOToolsManagement] [           main] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.4.5.Final
+2026-10-05T18:33:36.479+07:00  INFO 30700 --- [EOToolsManagement] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-10-05T18:33:36.519+07:00  INFO 30700 --- [EOToolsManagement] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-10-05T18:33:36.669+07:00  INFO 30700 --- [EOToolsManagement] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@5ae16aa
+2026-10-05T18:33:36.671+07:00  INFO 30700 --- [EOToolsManagement] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-10-05T18:33:36.722+07:00  WARN 30700 --- [EOToolsManagement] [           main] org.hibernate.orm.core                   : HHH000511: The 5.5.5 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly.The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2026-10-05T18:33:36.742+07:00  INFO 30700 --- [EOToolsManagement] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/eo_tools_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 5.5.5
+	Default catalog/schema: eo_tools_db/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-10-05T18:33:37.783+07:00  INFO 30700 --- [EOToolsManagement] [           main] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-10-05T18:33:38.099+07:00  INFO 30700 --- [EOToolsManagement] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-10-05T18:33:38.212+07:00  INFO 30700 --- [EOToolsManagement] [           main] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-10-05T18:33:39.712+07:00  WARN 30700 --- [EOToolsManagement] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-10-05T18:33:39.808+07:00  WARN 30700 --- [EOToolsManagement] [           main] .s.a.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: d9a4be36-65d2-4d97-b356-d6b5ed5f3668
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-10-05T18:33:39.817+07:00  INFO 30700 --- [EOToolsManagement] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-10-05T18:33:40.290+07:00  INFO 30700 --- [EOToolsManagement] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8080 (http) with context path '/'
+2026-10-05T18:33:40.297+07:00  INFO 30700 --- [EOToolsManagement] [           main] c.r.E.EoToolsManagementApplicationKt     : Started EoToolsManagementApplicationKt in 6.848 seconds (process running for 7.254)
+2026-10-05T18:33:54.388+07:00  INFO 30700 --- [EOToolsManagement] [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-10-05T18:33:54.388+07:00  INFO 30700 --- [EOToolsManagement] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-10-05T18:33:54.390+07:00  INFO 30700 --- [EOToolsManagement] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+Hibernate: 
+    select
+        e1_0.id,
+        e1_0.category,
+        e1_0.condition_status,
+        e1_0.description,
+        e1_0.name,
+        e1_0.total_quantity 
+    from
+        equipment e1_0
+Hibernate: 
+    insert 
+    into
+        equipment
+        (category, condition_status, description, name, total_quantity) 
+    values
+        (?, ?, ?, ?, ?)
+Hibernate: 
+    select
+        coalesce(sum(se1_0.quantity_borrowed), 0) 
+    from
+        schedule_equipments se1_0 
+    join
+        schedules s1_0 
+            on s1_0.id=se1_0.schedule_id 
+    where
+        se1_0.equipment_id=? 
+        and s1_0.status in ('UPCOMING', 'ONGOING')
+Hibernate: 
+    select
+        e1_0.id,
+        e1_0.category,
+        e1_0.condition_status,
+        e1_0.description,
+        e1_0.name,
+        e1_0.total_quantity 
+    from
+        equipment e1_0 
+    where
+        e1_0.id in (?)
+Hibernate: 
+    insert 
+    into
+        crews
+        (name, phone, role) 
+    values
+        (?, ?, ?)
+Hibernate: 
+    select
+        coalesce(sum(se1_0.quantity_borrowed), 0) 
+    from
+        schedule_equipments se1_0 
+    join
+        schedules s1_0 
+            on s1_0.id=se1_0.schedule_id 
+    where
+        se1_0.equipment_id=? 
+        and s1_0.status in ('UPCOMING', 'ONGOING')
+Hibernate: 
+    insert 
+    into
+        crew_equipments
+        (crew_id, equipment_id) 
+    values
+        (?, ?)
+Hibernate: 
+    select
+        e1_0.id,
+        e1_0.category,
+        e1_0.condition_status,
+        e1_0.description,
+        e1_0.name,
+        e1_0.total_quantity 
+    from
+        equipment e1_0 
+    where
+        e1_0.id=?
+Hibernate: 
+    select
+        c1_0.id,
+        c1_0.name,
+        c1_0.phone,
+        c1_0.role 
+    from
+        crews c1_0 
+    where
+        c1_0.id in (?)
+Hibernate: 
+    insert 
+    into
+        schedules
+        (description, end_date, end_time, event_name, location, start_date, start_time, status) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        schedule_equipments
+        (equipment_id, quantity_borrowed, schedule_id) 
+    values
+        (?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        schedule_crews
+        (schedule_id, crew_id) 
+    values
+        (?, ?)
+Hibernate: 
+    select
+        e1_0.id,
+        e1_0.category,
+        e1_0.condition_status,
+        e1_0.description,
+        e1_0.name,
+        e1_0.total_quantity 
+    from
+        equipment e1_0 
+    where
+        e1_0.id=?
+Hibernate: 
+    select
+        coalesce(sum(se1_0.quantity_borrowed), 0) 
+    from
+        schedule_equipments se1_0 
+    join
+        schedules s1_0 
+            on s1_0.id=se1_0.schedule_id 
+    where
+        se1_0.equipment_id=? 
+        and s1_0.status in ('UPCOMING', 'ONGOING')
+Hibernate: 
+    select
+        c1_0.equipment_id,
+        c1_1.id,
+        c1_1.name,
+        c1_1.phone,
+        c1_1.role 
+    from
+        crew_equipments c1_0 
+    join
+        crews c1_1 
+            on c1_1.id=c1_0.crew_id 
+    where
+        c1_0.equipment_id=?
+
+> Task :bootRun FAILED
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':bootRun' (registered by plugin 'org.springframework.boot').
+> Process 'command 'C:\Users\LENOVO\.gradle\jdks\eclipse_adoptium-25-amd64-windows.2\bin\java.exe'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 7m 37s
+4 actionable tasks: 1 executed, 3 up-to-date
