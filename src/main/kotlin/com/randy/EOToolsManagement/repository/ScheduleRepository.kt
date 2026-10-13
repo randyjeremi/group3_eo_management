@@ -20,4 +20,19 @@ interface ScheduleRepository : JpaRepository<Schedule, Long> {
         @Param("startDate") startDate: LocalDate,
         @Param("endDate") endDate: LocalDate
     ): List<Schedule>
+
+    @Query("""
+        SELECT s FROM Schedule s 
+        JOIN s.crews c 
+        WHERE c.id = :crewId 
+        AND s.status IN ('UPCOMING', 'ONGOING') 
+        AND (s.startDate <= :endDate AND s.endDate >= :startDate)
+        AND (:excludeScheduleId IS NULL OR s.id <> :excludeScheduleId)
+    """)
+    fun findConflictingSchedulesForCrew(
+        @Param("crewId") crewId: Long,
+        @Param("startDate") startDate: LocalDate,
+        @Param("endDate") endDate: LocalDate,
+        @Param("excludeScheduleId") excludeScheduleId: Long?
+    ): List<Schedule>
 }

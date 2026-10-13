@@ -514,7 +514,13 @@
                     body: JSON.stringify(body)
                 });
 
-                if (!res.ok) throw new Error('Simpan gagal');
+                if (!res.ok) {
+                    const errData = await res.json();
+                    const errMsg = errData.message || 'Gagal menyimpan jadwal event';
+                    showToast(errMsg, 'bg-danger');
+                    alert(`⚠️ BENTROK JADWAL / KRU DOUBLE JOB:\n\n${errMsg}`);
+                    return;
+                }
 
                 showToast(id ? 'Jadwal berhasil diperbarui!' : 'Jadwal baru berhasil dibuat!');
                 hideModal('scheduleModal');

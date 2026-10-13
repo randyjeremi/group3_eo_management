@@ -38,6 +38,12 @@ class ScheduleService(
 
     @Transactional
     fun createSchedule(request: ScheduleRequest): ScheduleResponse {
+        // Validasi ketersediaan Kru agar tidak double job di tanggal yang sama
+        checkCrewAvailability(request.crewIds, request.startDate, request.endDate)
+
+        // Validasi stok alat yang dipinjam
+        validateEquipmentStock(request.equipmentBorrowings)
+
         val schedule = Schedule(
             eventName = request.eventName,
             description = request.description,
@@ -76,6 +82,12 @@ class ScheduleService(
     fun updateSchedule(id: Long, request: ScheduleRequest): ScheduleResponse {
         val schedule = scheduleRepository.findById(id)
             .orElseThrow { ResourceNotFoundException("Jadwal dengan ID $id tidak ditemukan") }
+
+        // Validasi ketersediaan Kru (abaikan jadwal yang sedang di-update)
+        checkCrewAvailability(request.crewIds, request.startDate, request.endDate, excludeScheduleId = id)
+
+        // Validasi stok alat yang dipinjam
+        validateEquipmentStock(request.equipmentBorrowings, excludeScheduleId = id)
 
         schedule.eventName = request.eventName
         schedule.description = request.description
@@ -130,6 +142,60 @@ class ScheduleService(
             throw ResourceNotFoundException("Jadwal dengan ID $id tidak ditemukan")
         }
         scheduleRepository.deleteById(id)
+    }
+
+    private fun checkCrewAvailability(
+        crewIds: List<Long>,
+        startDate: LocalDate,
+        endDate: LocalDate,
+        excludeScheduleId: Long? = null
+    ) {
+        if (crewIds.isEmpty()) return
+
+        for (crewId in crewIds) {
+            val conflicting = scheduleRepository.findConflictingSchedulesForCrew(
+                crewId = crewId,
+                startDate = startDate,
+                endDate = endDate,
+                excludeScheduleId = excludeScheduleId
+            )
+
+            if (conflicting.isNotEmpty()) {
+                val crew = crewRepository.findById(crewId).orElse(null)
+                val crewName = crew?.name ?: "ID $crewId"
+                val conflictEvent = conflicting.first()
+                throw IllegalArgumentException("Kru '$crewName' sudah bertugas di event '${conflictEvent.eventName}' pada tanggal ${conflictEvent.startDate} s/d ${conflictEvent.endDate}!")
+            }
+        }
+    }
+
+    private fun validateEquipmentStock(
+        borrowings: List<EquipmentBorrowRequest>,
+        excludeScheduleId: Long? = null
+    ) {
+        for (borrowReq in borrowings) {
+            val equipment = equipmentRepository.findById(borrowReq.equipmentId)
+                .orElseThrow { ResourceNotFoundException("Equipment dengan ID ${borrowReq.equipmentId} tidak ditemukan") }
+
+            val totalBorrowedInActive = equipmentRepository.countBorrowedQuantityInActiveSchedules(borrowReq.equipmentId)
+
+            var currentScheduleBorrowed = 0
+            if (excludeScheduleId != null) {
+                val currentSchedule = scheduleRepository.findById(excludeScheduleId).orElse(null)
+                if (currentSchedule != null && (currentSchedule.status == ScheduleStatus.UPCOMING || currentSchedule.status == ScheduleStatus.ONGOING)) {
+                    currentScheduleBorrowed = currentSchedule.scheduleEquipments
+                        .filter { it.equipment.id == borrowReq.equipmentId }
+                        .sumOf { it.quantityBorrowed }
+                }
+            }
+
+            val otherBorrowedQty = (totalBorrowedInActive - currentScheduleBorrowed).coerceAtLeast(0)
+            val availableQty = equipment.totalQuantity - otherBorrowedQty
+
+            if (borrowReq.quantityBorrowed > availableQty) {
+                throw IllegalArgumentException("Stok alat '${equipment.name}' tidak mencukupi! Tersedia: $availableQty, diminta: ${borrowReq.quantityBorrowed}")
+            }
+        }
     }
 
     fun toScheduleResponse(schedule: Schedule): ScheduleResponse {
